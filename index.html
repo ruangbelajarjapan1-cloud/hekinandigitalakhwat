@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="color-scheme" content="light only">
+    <title>Digital Signage - Masjid As-Sunnah Hekinan (AKHWAT)</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Noto+Naskh+Arabic:wght@400;700&family=Noto+Sans+JP:wght@400;700&display=swap"
+        rel="stylesheet">
+
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            /* TEMA SIANG AKHWAT (SAGE GREEN) */
+            --bg-grad-1: #ffffff;
+            --bg-grad-2: #f7fdf4;
+            --glass: #ffffff;
+            --glass-border: rgba(104, 159, 56, 0.2);
+            --card-shadow: 0 4px 15px rgba(104, 159, 56, 0.08);
+            --text-main: #1c2e12;
+            --text-sub: #707e6b;
+            --primary: #689f38;
+            --accent: #a4bfa7;
+            --alert: #ef4444;
+            --rain: #f59e0b;
+            --footer-bg: #4c6e2d;
+            --footer-text: #ffffff;
+        }
+
+        /* TEMA MALAM AKHWAT */
+        body.mode-malam {
+            --bg-grad-1: #060e03;
+            --bg-grad-2: #121a0f;
+            --glass: rgba(18, 26, 15, 0.85);
+            --glass-border: rgba(164, 191, 167, 0.2);
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            --text-main: #f0f4ef;
+            --text-sub: #a1b0a0;
+            --primary: #9ccc65;
+            --accent: #a4bfa7;
+            --footer-bg: #2d421d;
+        }
+
+        body {
+            background: linear-gradient(-45deg, var(--bg-grad-1), var(--bg-grad-2));
+            color: var(--text-main);
+            font-family: 'Inter', 'Noto Sans JP', sans-serif;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            transition: background 1.5s ease;
+        }
+
+        /* HEADER */
+        header {
+            flex-shrink: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2vw;
+            background: var(--glass);
+            border-bottom: 0.4vh solid var(--primary);
+            box-shadow: var(--card-shadow);
+            height: 15vh;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1.5vw;
+            width: 35%;
+        }
+
+        .logo {
+            width: 13vh;
+            height: 13vh;
+            object-fit: contain;
+        }
+
+        .masjid-name h1 {
+            font-size: 3vh;
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 0.2vh;
+        }
+
+        .masjid-name p {
+            color: var(--primary);
+            font-size: 2.2vh;
+            font-weight: 800;
+            margin: 0;
+            line-height: 1.1;
+        }
+
+        .header-socials {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5vh;
+            margin-top: 0.8vh;
+        }
+
+        .social-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5vw;
+            font-size: 1.8vh;
+            color: var(--text-sub);
+            font-weight: 700;
+        }
+
+        .social-item i {
+            font-size: 2vh;
+            color: var(--primary);
+        }
+
+        .header-center {
+            width: 30%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.8vh;
+        }
+
+        .basmalah {
+            font-family: 'Noto Naskh Arabic', serif;
+            font-size: 4.5vh;
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .moment-badge {
+            font-size: 1.8vh;
+            font-weight: 800;
+            letter-spacing: 2px;
+            color: var(--text-sub);
+            text-transform: uppercase;
+            background: rgba(0, 0, 0, 0.05);
+            padding: 0.6vh 2vw;
+            border-radius: 20px;
+        }
+
+        .header-right {
+            text-align: right;
+            width: 35%;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            justify-content: center;
+        }
+
+        #time,
+        .cd-timer,
+        .prayer-name,
+        .prayer-time {
+            text-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        body.mode-malam #time,
+        body.mode-malam .cd-timer {
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        #time {
+            font-size: 6vh;
+            font-weight: 900;
+            line-height: 1;
+            margin-bottom: 0.8vh;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: -2px;
+        }
+
+        .info-bar {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.8vw;
+            margin-top: 0.5vh;
+        }
+
+        .info-pill {
+            display: flex;
+            align-items: center;
+            gap: 0.5vw;
+            background: rgba(104, 159, 56, 0.05);
+            padding: 0.4vh 1vw;
+            border-radius: 50px;
+            border: 1px solid var(--glass-border);
+            font-size: 1.6vh;
+            font-weight: 700;
+        }
+
+        .info-pill i {
+            color: var(--primary);
+            font-size: 1.8vh;
+        }
+
+        /* MAIN GRID */
+        main {
+            height: 77vh;
+            display: grid;
+            grid-template-columns: 1fr 1.6fr 1fr;
+            gap: 1.5vw;
+            padding: 1.5vh 1.5vw;
+        }
+
+        .card {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 1.5vw;
+            padding: 1.5vh 1.5vw;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--card-shadow);
+            backdrop-filter: blur(10px);
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .card-title {
+            text-align: center;
+            font-size: 2.6vh;
+            font-weight: 900;
+            color: var(--text-main);
+            border-bottom: 2px solid var(--glass-border);
+            padding-bottom: 0.8vh;
+            margin-bottom: 0.5vh;
+        }
+
+        .card-title span { 
+            display: block;
+            font-size: 1.5vh;
+            color: var(--primary);
+            font-weight: 700;
+            margin-top: 0.3vh;
+        }
+
+        /* KARTU 1: JADWAL SHOLAT */
+        .prayer-list {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-evenly;
+            height: 100%;
+        }
+
+        .prayer-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5vh 1.5vw;
+            border-radius: 1vw;
+            border-left: 0.4vw solid transparent;
+            transition: all 0.3s;
+        }
+
+        .prayer-item.next-prayer {
+            background: rgba(104, 159, 56, 0.08);
+            border-left-color: rgba(104, 159, 56, 0.5);
+        }
+
+        .prayer-item.active {
+            background: var(--primary) !important;
+            border-left-color: var(--accent) !important;
+            transform: scale(1.02);
+        }
+
+        .prayer-name {
+            font-size: 3vh;
+            font-weight: 800;
+            color: var(--text-main);
+        }
+
+        .prayer-jp {
+            font-size: 1.6vh;
+            color: var(--text-sub);
+            font-weight: 700;
+        }
+
+        .prayer-time {
+            font-size: 4vh;
+            font-weight: 900;
+            color: var(--primary);
+            line-height: 1;
+        }
+
+        .prayer-iqamah {
+            font-size: 2.2vh;
+            color: var(--accent);
+            font-weight: 800;
+            text-align: right;
+            margin-top: 0.2vh;
+        }
+
+        .prayer-item.active .prayer-name,
+        .prayer-item.active .prayer-jp,
+        .prayer-item.active .prayer-time,
+        .prayer-item.active .prayer-iqamah {
+            color: #ffffff !important;
+            text-shadow: none;
+        }
+
+        /* KARTU 2: CENTER AREA */
+        .center-col {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5vh;
+            height: 100%;
+        }
+
+        .countdown-box {
+            background: var(--glass);
+            border: 2px solid var(--glass-border);
+            border-radius: 1.5vw;
+            padding: 2.5vh 2vh 2vh;
+            text-align: center;
+            box-shadow: var(--card-shadow);
+            flex-shrink: 0;
+        }
+
+        .countdown-box.alert {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: var(--alert);
+        }
+
+        .cd-label {
+            font-size: 2vh;
+            font-weight: 800;
+            color: var(--text-sub);
+            letter-spacing: 2px;
+            margin-bottom: 0.5vh;
+        }
+
+        .cd-timer {
+            font-size: 11vh;
+            font-weight: 900;
+            color: var(--accent);
+            line-height: 1;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: -2px;
+        }
+
+        .cd-progress-track {
+            width: 70%;
+            height: 0.8vh;
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 10px;
+            margin: 1.5vh auto 0;
+            overflow: hidden;
+        }
+
+        .cd-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--primary));
+            width: 100%;
+            transition: width 1s linear;
+        }
+
+        .slide-container {
+            flex-grow: 1;
+            background: rgba(104, 159, 56, 0.03);
+            border-radius: 1.5vw;
+            border: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .slide-content {
+            padding: 2vh 2vw;
+            text-align: center;
+            width: 100%;
+            max-height: 100%;
+            animation: fadeUp 0.8s ease;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(2vh);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .slide-progress-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 0.8vh;
+            background: rgba(0, 0, 0, 0.05);
+            z-index: 10;
+        }
+
+        .slide-progress-fill {
+            height: 100%;
+            background: var(--accent);
+            width: 0%;
+        }
+
+        .anim-progress {
+            animation: fillBar 10s linear forwards;
+        }
+
+        @keyframes fillBar {
+            from {
+                width: 0%;
+            }
+
+            to {
+                width: 100%;
+            }
+        }
+
+        .text-arab {
+            font-family: 'Noto Naskh Arabic', serif;
+            font-size: 5.5vh;
+            color: var(--primary);
+            margin-bottom: 1.5vh;
+            line-height: 1.6;
+        }
+
+        .text-indo {
+            font-size: 3vh;
+            color: var(--text-main);
+            font-weight: 700;
+            font-style: italic;
+            margin-bottom: 2vh;
+            line-height: 1.4;
+        }
+
+        .text-source {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            padding: 1vh 2vw;
+            border-radius: 50px;
+            font-size: 1.8vh;
+            font-weight: 800;
+        }
+
+        /* KARTU 3: WAKAF DIPASKAN */
+        .wakaf-wrap {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100%;
+            gap: 1vh;
+        }
+
+        .stat-group h3 {
+            font-size: 4.5vh;
+            font-weight: 900;
+            color: var(--text-main);
+            margin: 0;
+            line-height: 1.1;
+        }
+
+        .stat-group p {
+            font-size: 1.8vh;
+            color: var(--text-sub);
+            font-weight: 700;
+            margin-bottom: 0.2vh;
+        }
+
+        .progress-track {
+            height: 2vh;
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 20px;
+            overflow: hidden;
+            margin: 1vh 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            transition: width 1.5s;
+        }
+
+        .qr-box-container {
+            margin-top: auto;
+            text-align: center;
+            background: rgba(104, 159, 56, 0.03);
+            padding: 1.5vh 1vh 1vh;
+            border-radius: 1.5vw;
+        }
+
+        #qr-title {
+            font-weight: 900;
+            color: var(--primary);
+            margin-bottom: 0.5vh;
+            font-size: 1.8vh;
+            letter-spacing: 1px;
+        }
+
+        .qr-progress-track {
+            width: 40%;
+            height: 0.5vh;
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 10px;
+            margin: 0.5vh auto 1.5vh;
+            overflow: hidden;
+        }
+
+        .qr-progress-fill {
+            height: 100%;
+            background: var(--accent);
+            width: 0%;
+        }
+
+        .qr-anim-bar {
+            animation: fillQR 8s linear forwards;
+        }
+
+        @keyframes fillQR {
+            from {
+                width: 0%;
+            }
+
+            to {
+                width: 100%;
+            }
+        }
+
+        #qrcode-dynamic img,
+        #qrcode-dynamic canvas {
+            margin: 0 auto;
+            width: 11vh !important;
+            height: 11vh !important;
+        }
+
+        #qr-desc {
+            font-size: 1.6vh;
+            color: var(--text-sub);
+            margin-top: 0.8vh;
+            font-weight: 700;
+        }
+
+        /* FOOTER */
+        footer {
+            height: 8vh;
+            flex-shrink: 0;
+            background: var(--footer-bg);
+            color: var(--footer-text);
+            display: flex;
+            align-items: center;
+            border-top: 0.5vh solid var(--accent);
+            font-size: 4vh;
+            font-weight: 800;
+            overflow: hidden;
+        }
+
+        .marquee {
+            width: 100%;
+            white-space: nowrap;
+        }
+
+        .marquee span {
+            display: inline-block;
+            padding-left: 100vw;
+            animation: scroll 30s linear infinite;
+        }
+
+        @keyframes scroll {
+            0% {
+                transform: translateX(0);
+            }
+
+            100% {
+                transform: translateX(-100%);
+            }
+        }
+
+        /* OVERLAYS */
+        .fullscreen-overlay {
+            position: fixed;
+            inset: 0;
+            background: var(--footer-bg);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s;
+        }
+
+        .fullscreen-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .overlay-title {
+            color: white;
+            font-size: 5vh;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            text-align: center;
+        }
+
+        .overlay-name {
+            color: var(--accent);
+            font-size: 15vh;
+            font-weight: 900;
+            margin: 2vh 0;
+            text-transform: uppercase;
+        }
+
+        #shaf-overlay {
+            background: #000000;
+        }
+
+        .shaf-text-big {
+            font-size: 8vh;
+            font-weight: 900;
+            color: #ffcc00;
+            text-align: center;
+            line-height: 1.1;
+            text-transform: uppercase;
+        }
+
+        .shaf-text-sub {
+            font-size: 3.5vh;
+            color: white;
+            margin-top: 2vh;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        #khutbah-overlay {
+            background: #1a1a1a;
+        }
+
+        .khutbah-text {
+            font-size: 8vh;
+            color: white;
+            font-weight: 800;
+            text-align: center;
+            line-height: 1.2;
+        }
+
+        /* YOUTUBE LIVE OVERLAY KHUSUS KAJIAN */
+        #youtube-overlay {
+            background: #000000;
+            z-index: 200;
+        }
+
+        .live-badge {
+            position: absolute;
+            top: 4vh;
+            left: 3vw;
+            color: white;
+            z-index: 201;
+            font-size: 3vh;
+            font-weight: 800;
+            background: rgba(239, 68, 68, 0.9);
+            padding: 1vh 2vw;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 1vw;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .live-dot {
+            display: inline-block;
+            width: 1.5vh;
+            height: 1.5vh;
+            background: white;
+            border-radius: 50%;
+            animation: blink 1.5s infinite;
+        }
+
+        @keyframes blink {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.2;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        body.deep-sleep {
+            filter: brightness(0.8);
+        }
+    </style>
+</head>
+
+<body>
+
+    <audio id="audio-chime" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"
+        preload="auto"></audio>
+
+    <div id="adzan-overlay" class="fullscreen-overlay">
+        <div class="overlay-title">MASUK WAKTU <span
+                style="font-size:0.6em; display:block; margin-top:1vh; color:#cbd5e1;">TIME FOR PRAYER / 礼拝の時間</span>
+        </div>
+        <div class="overlay-name" id="overlay-name">MAGHRIB</div>
+        <div style="color:white; font-size: 4vh; text-align:center;">Mohon Luruskan Shaf & Matikan HP<br><span
+                style="font-size: 3vh; color:#94a3b8;">Straighten Rows & Turn Off Phone / 列を整え、携帯を切ってください</span></div>
+    </div>
+
+    <div id="shaf-overlay" class="fullscreen-overlay">
+        <div style="font-size: 15vh; color:white; display:flex; gap: 4vw; justify-content: center; margin-bottom: 2vh;">
+            <i class="ph-fill ph-users-three"></i><i class="ph-fill ph-device-mobile-slash" style="color: #ef4444;"></i>
+        </div>
+        <div class="shaf-text-big" style="font-size: 7.5vh;">LURUSKAN SHAF & MATIKAN HP<br><span
+                style="font-size: 0.5em; color: #fef08a;">STRAIGHTEN ROWS & TURN OFF PHONE / 列を整え、携帯を切ってください</span>
+        </div>
+        <div class="shaf-text-sub">Sempurnakan shaf, itu bagian dari kesempurnaan sholat<br><span
+                style="font-size: 3vh; font-weight:400; color:#cbd5e1;">Perfecting rows is part of prayer /
+                列を整えることは祈りの一部です</span></div>
+    </div>
+
+    <div id="khutbah-overlay" class="fullscreen-overlay">
+        <div style="font-size: 18vh; color: var(--primary); margin-bottom: 2vh;"><i
+                class="ph-fill ph-hands-praying"></i></div>
+        <div class="khutbah-text">MOHON JANGAN ADA SUARA<br><span style="font-size: 0.5em; color: #94a3b8;">SILENCE
+                PLEASE / お静かに</span></div>
+        <div style="font-size: 4vh; color: #e2e8f0; margin-top: 3vh; text-align:center; font-weight:600;">Khutbah Jumat
+            Sedang Berlangsung<br><span style="font-size: 2.5vh; font-weight:400; color:#94a3b8;">Friday Khutbah in
+                Progress / 金曜礼拝の説教中です</span></div>
+    </div>
+
+    <div id="youtube-overlay" class="fullscreen-overlay">
+        <div class="live-badge"><span class="live-dot"></span> KAJIAN LIVE</div>
+        <iframe id="youtube-frame" src="" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen
+            style="width:100%; height:100%; pointer-events:none;"></iframe>
+    </div>
+
+    <header>
+        <div class="header-left">
+            <img src="logohekinan.png" alt="Logo" class="logo" onerror="this.src='logohekinan.jpeg'">
+            <div class="masjid-name">
+                <h1>MASJID AS-SUNNAH</h1>
+                <p>Hekinan, Japan</p>
+                <div class="header-socials">
+                    <div class="social-item"><i class="ph ph-globe"></i> assunnahhekinan.org</div>
+                    <div class="social-item"><i class="ph ph-instagram-logo"></i> @masjidhekinan</div>
+                </div>
+            </div>
+        </div>
+        <div class="header-center">
+            <div class="basmalah">بسم الله الرحمن الرحيم</div>
+            <div class="moment-badge" id="moment-text">Ahlan Wa Sahlan</div>
+        </div>
+        <div class="header-right">
+            <div id="time">00:00:00</div>
+            <div class="info-bar">
+                <div class="info-pill"><span id="date">...</span></div>
+                <div class="info-pill"><span id="hijri">...</span></div>
+            </div>
+            <div class="info-bar">
+                <div class="info-pill"><i class="ph ph-house-line"></i> JKT <span id="time-jkt">--:--</span></div>
+                <div class="info-pill"><i class="ph ph-mosque"></i> MEK <span id="time-mek">--:--</span></div>
+                <div class="info-pill" id="weather-pill"><i id="weather-icon" class="ph ph-cloud"></i> <span
+                        id="temp">--°C</span></div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="card">
+            <div class="card-title">Jadwal Sholat<span>Prayer Times / 本日の礼拝時間</span></div>
+            <div class="prayer-list" id="prayer-list"></div>
+        </div>
+
+        <div class="center-col">
+            <div class="countdown-box" id="cd-box">
+                <div class="cd-label" id="cd-label">MENUJU WAKTU SHOLAT</div>
+                <div class="cd-timer" id="cd-timer">--:--:--</div>
+                <div class="cd-progress-track">
+                    <div class="cd-progress-fill" id="cd-progress"></div>
+                </div>
+            </div>
+            <div class="slide-container" id="slide-area">
+                <div class="slide-content" id="slide-content"></div>
+                <div class="slide-progress-bar">
+                    <div class="slide-progress-fill" id="slide-bar"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Wakaf Tanah & Bangunan<span>Waqf Land & Building / 土地建物寄付</span></div>
+            <div class="wakaf-wrap">
+                <div class="stat-group">
+                    <p>Target / Goal / 目標</p>
+                    <h3 id="wakaf-target">¥ 0</h3>
+                </div>
+                <div class="stat-group">
+                    <p>Terkumpul / Collected / 現在</p>
+                    <h3 id="wakaf-terkumpul" style="color: var(--primary)">¥ 0</h3>
+                </div>
+                <div>
+                    <div class="progress-track">
+                        <div class="progress-fill" id="wakaf-bar"></div>
+                    </div>
+                    <div
+                        style="display:flex; justify-content:space-between; font-weight:bold; font-size:1.6vh; color:var(--text-sub);">
+                        <span>Progress</span><span id="wakaf-percent" style="color:var(--accent)">0%</span>
+                    </div>
+                </div>
+                <div class="qr-box-container">
+                    <div id="qr-title">SCAN INFO</div>
+                    <div class="qr-progress-track">
+                        <div class="qr-progress-fill" id="qr-progress"></div>
+                    </div>
+                    <div style="background: white; padding: 1vh; border-radius: 1vw; display: inline-block;">
+                        <div id="qrcode-dynamic"></div>
+                    </div>
+                    <div id="qr-desc">Ruang Akhwat</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="marquee"><span id="running-text">Ahlan Wa Sahlan di Ruang Akhwat Masjid As-Sunnah...</span></div>
+    </footer>
+
+    <script>
+        const CONFIG = {
+            API_URL: "https://script.google.com/macros/s/AKfycbwqV6GmVbvtAR6drC38u0WEumYvBi9Atz0r89iXnQz682Kg8iQHRChoeRyfnfXpRXUi/exec",
+            LAT: 34.8819,
+            LONG: 136.9956,
+            HIJRI_OFFSET: 0
+        };
+
+        // SLIDESHOW KHUSUS AKHWAT
+        // SLIDESHOW KHUSUS AKHWAT (DIPERBARUI DENGAN IKON BENDA MATI)
+        const ISLAMIC_CONTENT_AKHWAT = [
+            { type: 'quote', arab: "السلام عليكم ورحمة الله وبركاته", indo: "Ahlan Wa Sahlan Ummi & Akhwat fi Ruang Sholat Masjid As-Sunnah", source: "Kenyamanan Bersama" },
+            { type: 'text_akhwat', title: 'ADAB MEMBAWA ANAK', jp: '子供連れの礼拝マナー', desc: 'Mohon dekap Ananda saat Sholat berlangsung agar khusyuk jamaah terjaga.', icon: 'ph-leaf' },
+            { type: 'quote', arab: "الدُّنْيَا مَتَاعٌ وَخَيْرُ مَتَاعِ الدُّنْيَا الْمَرْأَةُ الصَّالِحَةُ", indo: "Dunia adalah perhiasan, dan sebaik-baik perhiasan dunia adalah wanita shalihah.", source: "HR. Muslim" },
+            { type: 'text_akhwat', title: 'JAGA KEBERSIHAN', jp: '衛生・美化の維持', desc: 'Mohon buang sampah pampers/snack ananda pada tempatnya. Syukron.', icon: 'ph-sparkle' }
+        ];
+
+        let state = { prayerToday: [], playlist: ISLAMIC_CONTENT_AKHWAT, slideIndex: 0, khatibData: null, rawData: null };
+        const el = (id) => document.getElementById(id);
+        const formatYen = (n) => new Intl.NumberFormat('ja-JP', { style: 'currency', currency: 'JPY' }).format(n);
+
+        function createDate(timeStr) {
+            if (!timeStr) return null;
+            const [h, m] = timeStr.split(':').map(Number);
+            const d = new Date(); d.setHours(h, m, 0, 0); return d;
+        }
+
+        function updateClock() {
+            const now = new Date();
+            el('time').innerText = now.toLocaleTimeString('en-GB', { hour12: false });
+            el('date').innerText = now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' });
+            el('time-jkt').innerText = now.toLocaleTimeString('en-GB', { timeZone: 'Asia/Jakarta', hour: '2-digit', minute: '2-digit' });
+            el('time-mek').innerText = now.toLocaleTimeString('en-GB', { timeZone: 'Asia/Riyadh', hour: '2-digit', minute: '2-digit' });
+
+            let isMalam = false;
+            if (state.prayerToday && state.prayerToday.length > 0) {
+                const maghrib = state.prayerToday.find(p => p.name === 'Maghrib')?.adzan;
+                const syuruq = state.prayerToday.find(p => p.name === 'Syuruq')?.adzan;
+                if (maghrib && syuruq && (now >= maghrib || now < syuruq)) isMalam = true;
+            } else {
+                if (now.getHours() >= 18 || now.getHours() < 5) isMalam = true;
+            }
+
+            if (isMalam) document.body.classList.add('mode-malam');
+            else document.body.classList.remove('mode-malam');
+
+            if (now.getHours() >= 22 || now.getHours() < 3) document.body.classList.add('deep-sleep');
+            else document.body.classList.remove('deep-sleep');
+
+            if (now.getHours() === 3 && now.getMinutes() === 0 && now.getSeconds() === 0) window.location.reload();
+            el('moment-text').innerText = (now.getDay() === 5) ? "JUMAT MUBARAK" : "Ahlan Wa Sahlan";
+        }
+        setInterval(updateClock, 1000); updateClock();
+
+        async function fetchAllData() {
+            try {
+                // CUACA & HIJRI
+                const resW = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${CONFIG.LAT}&longitude=${CONFIG.LONG}&current_weather=true`);
+                const dataW = await resW.json();
+                el('temp').innerText = `${Math.round(dataW.current_weather.temperature)}°C`;
+                const code = dataW.current_weather.weathercode;
+                const wp = el('weather-pill'); const wi = el('weather-icon');
+                wp.classList.remove('rain-alert');
+                if ([51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82, 95, 96, 99].includes(code)) { wp.classList.add('rain-alert'); wi.className = "ph-fill ph-umbrella"; }
+                else if ([71, 73, 75, 77, 85, 86].includes(code)) { wi.className = "ph-fill ph-snowflake"; }
+                else if ([0, 1].includes(code)) { wi.className = document.body.classList.contains('mode-malam') ? "ph-fill ph-moon" : "ph-fill ph-sun"; }
+                else { wi.className = "ph-fill ph-cloud"; }
+
+                const nowUnix = Math.floor(Date.now() / 1000);
+                const resP = await fetch(`https://api.aladhan.com/v1/timings/${nowUnix}?latitude=${CONFIG.LAT}&longitude=${CONFIG.LONG}&method=1&adjustment=${CONFIG.HIJRI_OFFSET}`);
+                const dataP = await resP.json();
+                el('hijri').innerText = `${dataP.data.date.hijri.day} ${dataP.data.date.hijri.month.en} ${dataP.data.date.hijri.year}H`;
+
+                // MENGAMBIL DATA DARI SHEET MAS WAHYU (YANG LAMA)
+                const resS = await fetch(CONFIG.API_URL + "?v=" + new Date().getTime());
+                state.rawData = await resS.json();
+
+                renderPrayer(dataP.data.timings, state.rawData.iqamah);
+                renderWakafAndInfo(state.rawData.wakaf, state.rawData.config || {});
+
+                // --------- YOUTUBE KAJIAN LIVE (BACA DARI SHEET CONFIG) ---------
+                const ytOverlay = el('youtube-overlay');
+                const ytFrame = el('youtube-frame');
+
+                // Mengecek apakah Mas Wahyu mengisi kolom youtube_id di sheet Config
+                if (state.rawData.config && state.rawData.config.youtube_id && state.rawData.config.youtube_id.trim() !== "") {
+                    const ytId = state.rawData.config.youtube_id.trim();
+                    const newSrc = `https://www.youtube-nocookie.com/embed/${ytId}?autoplay=1&mute=0&controls=0&modestbranding=1&rel=0`;
+
+                    if (!ytFrame.src.includes(ytId)) {
+                        ytFrame.src = newSrc; // Inject video baru
+                    }
+                    ytOverlay.classList.add('active'); // Buka layar hitam Youtube
+                } else {
+                    // Jika dihapus dari spreadsheet, tutup otomatis
+                    if (ytOverlay.classList.contains('active')) {
+                        ytOverlay.classList.remove('active');
+                        ytFrame.src = "";
+                    }
+                }
+                // ---------------------------------------------------------------
+
+                if (state.rawData.running_text) {
+                    el('running-text').innerText = state.rawData.running_text.filter(r => r.id).map(r => `${r.id} (${r.jp})`).join("  ✦  ");
+                }
+            } catch (e) { console.log(e); }
+        }
+
+        fetchAllData(); setInterval(fetchAllData, 60000);
+
+        function renderPrayer(times, iqamahData) {
+            const map = { Fajr: 'Subuh', Sunrise: 'Syuruq', Dhuhr: 'Dzuhur', Asr: 'Ashar', Maghrib: 'Maghrib', Isha: 'Isya' };
+            const jpMap = { Subuh: 'ファジル', Syuruq: '日の出', Dzuhur: 'ズフール', Ashar: 'アスル', Maghrib: 'マグリブ', Isya: 'イシャー' };
+            let html = `<div style="display:flex; justify-content:space-between; padding:0 1.5vw 1vh; margin-bottom:0.5vh; border-bottom:1px solid var(--glass-border); font-size:1.5vh; color:var(--text-sub); font-weight:700; text-transform:uppercase;"><div>WAKTU / TIME</div><div>ADZAN | IQAMAH</div></div>`;
+            state.prayerToday = [];
+            for (let key in map) {
+                let time = times[key]; let iqVal = "--:--";
+                if (iqamahData) {
+                    if (key === 'Fajr') iqVal = iqamahData.Subuh;
+                    if (key === 'Asr') iqVal = iqamahData.Ashar;
+                    if (key === 'Maghrib') iqVal = iqamahData.Maghrib;
+                    if (key === 'Isha') iqVal = (new Date().getDay() === 0 || new Date().getDay() === 6) ? iqamahData.Isya_Weekend : iqamahData.Isya_Biasa;
+                    if (key === 'Dhuhr') iqVal = (new Date().getDay() === 5 && iqamahData.Jumat) ? iqamahData.Jumat : iqamahData.Dzuhur;
+                }
+                html += `<div class="prayer-item" id="row-${map[key]}"><div><div class="prayer-name">${map[key]}</div><div class="prayer-jp">${jpMap[map[key]]}</div></div><div style="text-align:right"><div class="prayer-time ${key === 'Sunrise' ? 'style="color:var(--text-sub)"' : ''}">${time}</div><div class="prayer-iqamah ${key === 'Sunrise' ? 'style="color:var(--text-sub)"' : ''}">${key === 'Sunrise' ? '-' : (iqVal || '')}</div></div></div>`;
+                state.prayerToday.push({ name: map[key], adzan: createDate(time), iqamah: key !== 'Sunrise' ? (iqVal.includes(':') ? createDate(iqVal) : null) : null });
+            }
+            el('prayer-list').innerHTML = html;
+        }
+
+        let qrInterval = null;
+        function renderWakafAndInfo(data, config) {
+            if (data) {
+                el('wakaf-terkumpul').innerText = formatYen(data.terkumpul);
+                el('wakaf-target').innerText = formatYen(data.target);
+                let pct = Math.min((data.terkumpul / data.target) * 100, 100);
+                el('wakaf-bar').style.width = pct + "%"; el('wakaf-percent').innerText = pct.toFixed(1) + "%";
+            }
+
+            // QR CODE KHUSUS AKHWAT
+            const linksAkhwat = [
+                { type: 'WA MUSLIMAH HEK', url: 'https://chat.whatsapp.com/GantiUrlGrupAkhwatDisini', desc: 'Grup Koordinasi Akhwat' },
+                { type: 'WAKAF MEK (LAND)', url: config.website || '#', desc: 'Pembebasan Lahan Masjid' },
+                { type: 'TPA ANAK HEK', url: 'https://assunnahhekinan.org/tpa-anak', desc: 'Info Kelas Belajar Anak' }
+            ];
+            let idx = 0;
+            if (window.qrInterval) clearInterval(window.qrInterval);
+            function showQR() {
+                el('qrcode-dynamic').innerHTML = "";
+                const item = linksAkhwat[idx];
+                new QRCode(el('qrcode-dynamic'), { text: item.url, width: 200, height: 200 });
+                el('qr-title').innerText = item.type;
+                el('qr-desc').innerText = item.desc;
+                el('qr-progress').classList.remove('qr-anim-bar');
+                void el('qr-progress').offsetWidth;
+                el('qr-progress').classList.add('qr-anim-bar');
+                idx = (idx + 1) % linksAkhwat.length;
+            }
+            showQR(); window.qrInterval = setInterval(showQR, 8000);
+        }
+
+        function rotateSlide() {
+            if (!state.playlist.length) return;
+            state.slideIndex = (state.slideIndex + 1) % state.playlist.length;
+            const item = state.playlist[state.slideIndex];
+            const area = el('slide-content');
+
+            if (item.type === 'sapaan' || item.type === 'quote') {
+                area.innerHTML = `<div class="text-arab">${item.arab}</div><div class="text-indo">"${item.indo}"</div><div class="text-source">${item.source}</div>`;
+            } else if (item.type === 'text_akhwat') {
+                // Tampilan Khusus Pengumuman Akhwat DENGAN IKON BENDA MATI (Aman)
+                area.innerHTML = `
+                    <div style="font-size: 10vh; color: var(--accent); margin-bottom: 2vh;"><i class="ph-fill ${item.icon}"></i></div>
+                    <div style="font-size:5.5vh; font-weight:900; color:var(--text-main); line-height:1.2; text-transform:uppercase;">${item.title}</div>
+                    <div style="font-size:3vh; color:var(--primary); margin: 1vh 0; font-family:'Noto Sans JP'; font-weight:700;">${item.jp}</div>
+                    <div style="font-size:2.8vh; color:var(--text-main); font-weight:600; line-height:1.4;">${item.desc}</div>
+                `;
+            }
+            el('slide-bar').classList.remove('anim-progress'); void el('slide-bar').offsetWidth; el('slide-bar').classList.add('anim-progress');
+        }
+        rotateSlide(); setInterval(rotateSlide, 10000);
+
+        function updateLogic() {
+            const now = new Date();
+            let target = null; let type = ""; let name = ""; let prevTarget = null; let totalDur = 1; let passed = 0;
+            const sorted = state.prayerToday.filter(p => p.name !== 'Syuruq').sort((a, b) => a.adzan - b.adzan);
+            for (let i = 0; i < sorted.length; i++) {
+                let p = sorted[i];
+                if (p.iqamah && now >= p.adzan && now < p.iqamah) { target = p.iqamah; type = "iqamah"; name = p.name; totalDur = p.iqamah - p.adzan; passed = now - p.adzan; break; }
+                if (now < p.adzan) {
+                    target = p.adzan; type = "adzan"; name = p.name;
+                    prevTarget = (i === 0) ? new Date(sorted[sorted.length - 1].adzan).setDate(new Date().getDate() - 1) : sorted[i - 1].adzan;
+                    totalDur = target - prevTarget; passed = now - prevTarget; break;
+                }
+            }
+            if (!target && sorted.length > 0) {
+                target = new Date(sorted[0].adzan).setDate(new Date().getDate() + 1); type = "adzan"; name = sorted[0].name;
+                totalDur = target - sorted[sorted.length - 1].adzan; passed = now - sorted[sorted.length - 1].adzan;
+            }
+            if (target) {
+                const diff = target - now;
+                el('cd-timer').innerText = `${Math.floor(diff / 3600000).toString().padStart(2, '0')}:${Math.floor((diff % 3600000) / 60000).toString().padStart(2, '0')}:${Math.floor((diff % 60000) / 1000).toString().padStart(2, '0')}`;
+                el('cd-progress').style.width = Math.max(0, Math.min(100, 100 - ((passed / totalDur) * 100))) + "%";
+                highlightRow((type === 'iqamah') ? name : '');
+                if (type === 'iqamah') {
+                    el('cd-label').innerText = `IQAMAH ${name}`; el('cd-box').classList.add('alert');
+                    if (diff < 5000 && diff > 4000) el('audio-chime').play().catch(e => { });
+                    if (diff <= 1000 && diff > -600000) el('shaf-overlay').classList.add('active');
+                    else el('shaf-overlay').classList.remove('active');
+                } else {
+                    el('cd-label').innerText = `MENUJU ${name}`; el('cd-box').classList.remove('alert'); el('shaf-overlay').classList.remove('active');
+                    const nextRow = el(`row-${name}`); if (nextRow) nextRow.classList.add('next-prayer');
+                }
+            }
+        }
+        setInterval(updateLogic, 1000);
+        function highlightRow(name) { document.querySelectorAll('.prayer-item').forEach(e => { e.classList.remove('active'); e.classList.remove('next-prayer'); }); const row = el(`row-${name}`); if (row) row.classList.add('active'); }
+    </script>
+</body>
+
+</html>
