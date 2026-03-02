@@ -240,7 +240,7 @@
             margin-bottom: 0.5vh;
         }
 
-        .card-title span { 
+        .card-title span {
             display: block;
             font-size: 1.5vh;
             color: var(--primary);
@@ -576,7 +576,7 @@
         .marquee span {
             display: inline-block;
             padding-left: 100vw;
-            animation: scroll 60s linear infinite; /* Kecepatan diperlambat menjadi 60s */
+            animation: scroll 60s linear infinite;
         }
 
         @keyframes scroll {
@@ -707,6 +707,7 @@
         body.deep-sleep {
             filter: brightness(0.8);
         }
+
         .bg-pattern {
             position: fixed;
             inset: 0;
@@ -715,9 +716,9 @@
             z-index: 0;
             pointer-events: none;
         }
-        
-        /* Memastikan konten utama tetap berada di atas background */
-        header, main, footer, .fullscreen-overlay {
+
+        /* PERBAIKAN: Memastikan konten utama berada di atas pattern tanpa mengganggu overlay */
+        header, main, footer {
             position: relative;
             z-index: 1;
         }
@@ -725,9 +726,10 @@
 </head>
 
 <body>
-<body>
     <div class="bg-pattern"></div>
-    <audio id="audio-chime" src="iqamah.mp3" preload="auto"></audio> <div id="adzan-overlay" class="fullscreen-overlay">
+    <audio id="audio-chime" src="iqamah.mp3" preload="auto"></audio>
+    
+    <div id="adzan-overlay" class="fullscreen-overlay">
         <div class="overlay-title">MASUK WAKTU <span
                 style="font-size:0.6em; display:block; margin-top:1vh; color:#cbd5e1;">TIME FOR PRAYER / 礼拝の時間</span>
         </div>
@@ -781,7 +783,8 @@
             <div class="moment-badge" id="moment-text">Ahlan Wa Sahlan</div>
         </div>
         <div class="header-right">
-            <div id="time">00 : 00 : 00</div> <div class="info-bar">
+            <div id="time">00 : 00 : 00</div>
+            <div class="info-bar">
                 <div class="info-pill"><span id="date">...</span></div>
                 <div class="info-pill"><span id="hijri">...</span></div>
             </div>
@@ -803,7 +806,8 @@
         <div class="center-col">
             <div class="countdown-box" id="cd-box">
                 <div class="cd-label" id="cd-label">MENUJU WAKTU SHOLAT</div>
-                <div class="cd-timer" id="cd-timer">-- : -- : --</div> <div class="cd-progress-track">
+                <div class="cd-timer" id="cd-timer">-- : -- : --</div>
+                <div class="cd-progress-track">
                     <div class="cd-progress-fill" id="cd-progress"></div>
                 </div>
             </div>
@@ -865,7 +869,7 @@
         const ISLAMIC_CONTENT_AKHWAT = [
             { type: 'quote', arab: "السلام عليكم ورحمة الله وبركاته", indo: "Ahlan Wa Sahlan Ummi & Akhwat fi Ruang Sholat Masjid As-Sunnah", source: "Kenyamanan Bersama" },
             
-            // --- SLIDE JADWAL BARU DITAMBAHKAN DI SINI ---
+            // --- SLIDE JADWAL KAJIAN ---
             { 
                 type: 'jadwal', 
                 title: 'JADWAL RUTIN AKHWAT', 
@@ -874,7 +878,6 @@
                     { day: 'Ahad, 16:00', name: 'TPA Anak Hekinan', ustadz: 'Tim Pengajar' }
                 ] 
             },
-            // ---------------------------------------------
 
             { type: 'text_akhwat', title: 'ADAB MEMBAWA ANAK', jp: '子供連れの礼拝マナー', desc: 'Mohon dekap Ananda saat Sholat berlangsung agar khusyuk jamaah terjaga.', icon: 'ph-leaf' },
             { type: 'text_akhwat', title: 'JAGA KEBERSIHAN', jp: '衛生・美化の維持', desc: 'Mohon buang sampah pampers/snack ananda pada tempatnya. Syukron.', icon: 'ph-sparkle' }
@@ -892,7 +895,6 @@
 
         function updateClock() {
             const now = new Date();
-            // Modifikasi spasi pada jam utama
             el('time').innerText = now.toLocaleTimeString('en-GB', { hour12: false }).split(':').join(' : ');
             el('date').innerText = now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' });
             el('time-jkt').innerText = now.toLocaleTimeString('en-GB', { timeZone: 'Asia/Jakarta', hour: '2-digit', minute: '2-digit' });
@@ -942,8 +944,11 @@
 
                 renderPrayer(dataP.data.timings, state.rawData.iqamah);
                 renderWakafAndInfo(state.rawData.wakaf, state.rawData.config || {});
-updatePlaylistAkhwat(state.rawData);
-                // --------- YOUTUBE KAJIAN LIVE ---------
+                
+                // MENGGABUNGKAN PENGUMUMAN GS KE SLIDESHOW
+                updatePlaylistAkhwat(state.rawData);
+
+                // YOUTUBE KAJIAN LIVE
                 const ytOverlay = el('youtube-overlay');
                 const ytFrame = el('youtube-frame');
 
@@ -969,10 +974,11 @@ updatePlaylistAkhwat(state.rawData);
         }
 
         fetchAllData(); setInterval(fetchAllData, 60000);
-function updatePlaylistAkhwat(json) {
-            let list = [...ISLAMIC_CONTENT_AKHWAT]; // Ambil konten statis dasar
+
+        function updatePlaylistAkhwat(json) {
+            let list = [...ISLAMIC_CONTENT_AKHWAT]; 
             
-            // Masukkan Pengumuman dari Google Sheets (termasuk Lost & Found)
+            // Masukkan Pengumuman (Lost & Found) dari tab Pengumuman_Akhwat
             if(json.pengumuman && json.pengumuman.length > 0) {
                 json.pengumuman.forEach(p => { 
                     if(p.id) list.push({ type:'text_akhwat', title: '📢 INFO MASJID', jp: p.id, desc: p.jp, icon: 'ph-megaphone' }); 
@@ -980,6 +986,7 @@ function updatePlaylistAkhwat(json) {
             }
             state.playlist = list;
         }
+
         function renderPrayer(times, iqamahData) {
             const map = { Fajr: 'Subuh', Sunrise: 'Syuruq', Dhuhr: 'Dzuhur', Asr: 'Ashar', Maghrib: 'Maghrib', Isha: 'Isya' };
             const jpMap = { Subuh: 'ファジル', Syuruq: '日の出', Dzuhur: 'ズフール', Ashar: 'アスル', Maghrib: 'マグリブ', Isya: 'イシャー' };
@@ -1009,7 +1016,6 @@ function updatePlaylistAkhwat(json) {
                 el('wakaf-bar').style.width = pct + "%"; el('wakaf-percent').innerText = pct.toFixed(1) + "%";
             }
 
-            // QR CODE KHUSUS AKHWAT
             const linksAkhwat = [
                 { type: 'WA MUSLIMAH HEK', url: 'https://chat.whatsapp.com/GantiUrlGrupAkhwatDisini', desc: 'Grup Koordinasi Akhwat' },
                 { type: 'WAKAF MEK (LAND)', url: config.website || '#', desc: 'Pembebasan Lahan Masjid' },
@@ -1046,8 +1052,8 @@ function updatePlaylistAkhwat(json) {
                     <div style="font-size:3vh; color:var(--primary); margin: 1vh 0; font-family:'Noto Sans JP'; font-weight:700;">${item.jp}</div>
                     <div style="font-size:2.8vh; color:var(--text-main); font-weight:600; line-height:1.4;">${item.desc}</div>
                 `;
-               } else if (item.type === 'jadwal') {
-                // --- DESAIN TAMPILAN JADWAL KAJIAN ---
+            } else if (item.type === 'jadwal') {
+                // DESAIN TAMPILAN JADWAL KAJIAN
                 let listHTML = item.items.map(i => `
                     <div style="display:flex; justify-content:space-between; background:var(--glass); margin-bottom:1vh; padding:1.5vh 2vw; border-radius:1vw; border:1px solid var(--glass-border); box-shadow: 0 2px 5px rgba(0,0,0,0.02);">
                         <div style="text-align:left;">
@@ -1093,7 +1099,6 @@ function updatePlaylistAkhwat(json) {
             if (target) {
                 const diff = target - now;
                 
-                // Modifikasi spasi pada teks hitung mundur
                 const h = Math.floor(diff / 3600000).toString().padStart(2, '0');
                 const m = Math.floor((diff % 3600000) / 60000).toString().padStart(2, '0');
                 const s = Math.floor((diff % 60000) / 1000).toString().padStart(2, '0');
