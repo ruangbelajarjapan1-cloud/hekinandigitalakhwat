@@ -707,11 +707,26 @@
         body.deep-sleep {
             filter: brightness(0.8);
         }
+        .bg-pattern {
+            position: fixed;
+            inset: 0;
+            /* Pola geometris Islami (SVG) dengan warna hijau sage tipis */
+            background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 20.5V18H0v-2h20v-2h2v2h18v2H22v2.5h18v2H22v2.5h18v2H22v2.5h18v2H22v2h-2v-2H0v-2h20v-2.5H0v-2h20v-2.5H0v-2h20z' fill='%23689f38' fill-opacity='0.04' fill-rule='evenodd'/%3E%3C/svg%3E");
+            z-index: 0;
+            pointer-events: none;
+        }
+        
+        /* Memastikan konten utama tetap berada di atas background */
+        header, main, footer, .fullscreen-overlay {
+            position: relative;
+            z-index: 1;
+        }
     </style>
 </head>
 
 <body>
-
+<body>
+    <div class="bg-pattern"></div>
     <audio id="audio-chime" src="iqamah.mp3" preload="auto"></audio> <div id="adzan-overlay" class="fullscreen-overlay">
         <div class="overlay-title">MASUK WAKTU <span
                 style="font-size:0.6em; display:block; margin-top:1vh; color:#cbd5e1;">TIME FOR PRAYER / 礼拝の時間</span>
@@ -849,8 +864,19 @@
         // SLIDESHOW KHUSUS AKHWAT
         const ISLAMIC_CONTENT_AKHWAT = [
             { type: 'quote', arab: "السلام عليكم ورحمة الله وبركاته", indo: "Ahlan Wa Sahlan Ummi & Akhwat fi Ruang Sholat Masjid As-Sunnah", source: "Kenyamanan Bersama" },
+            
+            // --- SLIDE JADWAL BARU DITAMBAHKAN DI SINI ---
+            { 
+                type: 'jadwal', 
+                title: 'JADWAL RUTIN AKHWAT', 
+                items: [
+                    { day: 'Sabtu, 10:00', name: 'Kajian Fikih Wanita', ustadz: 'Ustadz Yusril' },
+                    { day: 'Ahad, 16:00', name: 'TPA Anak Hekinan', ustadz: 'Tim Pengajar' }
+                ] 
+            },
+            // ---------------------------------------------
+
             { type: 'text_akhwat', title: 'ADAB MEMBAWA ANAK', jp: '子供連れの礼拝マナー', desc: 'Mohon dekap Ananda saat Sholat berlangsung agar khusyuk jamaah terjaga.', icon: 'ph-leaf' },
-            { type: 'quote', arab: "الدُّنْيَا مَتَاعٌ وَخَيْرُ مَتَاعِ الدُّنْيَا الْمَرْأَةُ الصَّالِحَةُ", indo: "Dunia adalah perhiasan, dan sebaik-baik perhiasan dunia adalah wanita shalihah.", source: "HR. Muslim" },
             { type: 'text_akhwat', title: 'JAGA KEBERSIHAN', jp: '衛生・美化の維持', desc: 'Mohon buang sampah pampers/snack ananda pada tempatnya. Syukron.', icon: 'ph-sparkle' }
         ];
 
@@ -916,7 +942,7 @@
 
                 renderPrayer(dataP.data.timings, state.rawData.iqamah);
                 renderWakafAndInfo(state.rawData.wakaf, state.rawData.config || {});
-
+updatePlaylistAkhwat(state.rawData);
                 // --------- YOUTUBE KAJIAN LIVE ---------
                 const ytOverlay = el('youtube-overlay');
                 const ytFrame = el('youtube-frame');
@@ -943,7 +969,17 @@
         }
 
         fetchAllData(); setInterval(fetchAllData, 60000);
-
+function updatePlaylistAkhwat(json) {
+            let list = [...ISLAMIC_CONTENT_AKHWAT]; // Ambil konten statis dasar
+            
+            // Masukkan Pengumuman dari Google Sheets (termasuk Lost & Found)
+            if(json.pengumuman && json.pengumuman.length > 0) {
+                json.pengumuman.forEach(p => { 
+                    if(p.id) list.push({ type:'text_akhwat', title: '📢 INFO MASJID', jp: p.id, desc: p.jp, icon: 'ph-megaphone' }); 
+                });
+            }
+            state.playlist = list;
+        }
         function renderPrayer(times, iqamahData) {
             const map = { Fajr: 'Subuh', Sunrise: 'Syuruq', Dhuhr: 'Dzuhur', Asr: 'Ashar', Maghrib: 'Maghrib', Isha: 'Isya' };
             const jpMap = { Subuh: 'ファジル', Syuruq: '日の出', Dzuhur: 'ズフール', Ashar: 'アスル', Maghrib: 'マグリブ', Isya: 'イシャー' };
@@ -1010,6 +1046,25 @@
                     <div style="font-size:3vh; color:var(--primary); margin: 1vh 0; font-family:'Noto Sans JP'; font-weight:700;">${item.jp}</div>
                     <div style="font-size:2.8vh; color:var(--text-main); font-weight:600; line-height:1.4;">${item.desc}</div>
                 `;
+               } else if (item.type === 'jadwal') {
+                // --- DESAIN TAMPILAN JADWAL KAJIAN ---
+                let listHTML = item.items.map(i => `
+                    <div style="display:flex; justify-content:space-between; background:var(--glass); margin-bottom:1vh; padding:1.5vh 2vw; border-radius:1vw; border:1px solid var(--glass-border); box-shadow: 0 2px 5px rgba(0,0,0,0.02);">
+                        <div style="text-align:left;">
+                            <div style="font-weight:800; color:var(--text-main); font-size:2.5vh;">${i.name}</div>
+                            <div style="color:var(--text-sub); font-size:2vh;">${i.ustadz}</div>
+                        </div>
+                        <div style="font-weight:900; color:var(--primary); font-size:2.5vh; display:flex; align-items:center;">
+                            ${i.day}
+                        </div>
+                    </div>
+                `).join('');
+
+                area.innerHTML = `
+                    <div style="font-size: 6vh; color: var(--accent); margin-bottom: 1vh;"><i class="ph-fill ph-calendar-check"></i></div>
+                    <div style="font-size:3.5vh; font-weight:900; color:var(--text-main); margin-bottom:2vh;">${item.title}</div>
+                    <div style="width:100%;">${listHTML}</div>
+                `; 
             }
             el('slide-bar').classList.remove('anim-progress'); void el('slide-bar').offsetWidth; el('slide-bar').classList.add('anim-progress');
         }
