@@ -911,7 +911,7 @@
                 const dataP = await resP.json();
                 el('hijri').innerText = `${dataP.data.date.hijri.day} ${dataP.data.date.hijri.month.en} ${dataP.data.date.hijri.year}H`;
 
-                const resS = await fetch(CONFIG.API_URL + "?v=" + new Date().getTime());
+                const resS = await fetch(CONFIG.API_URL + "?screen=akhwat&v=" + new Date().getTime());
                 state.rawData = await resS.json();
 
                 renderPrayer(dataP.data.timings, state.rawData.iqamah);
