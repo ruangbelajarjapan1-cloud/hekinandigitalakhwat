@@ -576,7 +576,7 @@
         .marquee span {
             display: inline-block;
             padding-left: 100vw;
-            animation: scroll 30s linear infinite;
+            animation: scroll 60s linear infinite; /* Kecepatan diperlambat menjadi 60s */
         }
 
         @keyframes scroll {
@@ -712,10 +712,7 @@
 
 <body>
 
-    <audio id="audio-chime" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"
-        preload="auto"></audio>
-
-    <div id="adzan-overlay" class="fullscreen-overlay">
+    <audio id="audio-chime" src="iqamah.mp3" preload="auto"></audio> <div id="adzan-overlay" class="fullscreen-overlay">
         <div class="overlay-title">MASUK WAKTU <span
                 style="font-size:0.6em; display:block; margin-top:1vh; color:#cbd5e1;">TIME FOR PRAYER / 礼拝の時間</span>
         </div>
@@ -769,8 +766,7 @@
             <div class="moment-badge" id="moment-text">Ahlan Wa Sahlan</div>
         </div>
         <div class="header-right">
-            <div id="time">00:00:00</div>
-            <div class="info-bar">
+            <div id="time">00 : 00 : 00</div> <div class="info-bar">
                 <div class="info-pill"><span id="date">...</span></div>
                 <div class="info-pill"><span id="hijri">...</span></div>
             </div>
@@ -792,8 +788,7 @@
         <div class="center-col">
             <div class="countdown-box" id="cd-box">
                 <div class="cd-label" id="cd-label">MENUJU WAKTU SHOLAT</div>
-                <div class="cd-timer" id="cd-timer">--:--:--</div>
-                <div class="cd-progress-track">
+                <div class="cd-timer" id="cd-timer">-- : -- : --</div> <div class="cd-progress-track">
                     <div class="cd-progress-fill" id="cd-progress"></div>
                 </div>
             </div>
@@ -852,7 +847,6 @@
         };
 
         // SLIDESHOW KHUSUS AKHWAT
-        // SLIDESHOW KHUSUS AKHWAT (DIPERBARUI DENGAN IKON BENDA MATI)
         const ISLAMIC_CONTENT_AKHWAT = [
             { type: 'quote', arab: "السلام عليكم ورحمة الله وبركاته", indo: "Ahlan Wa Sahlan Ummi & Akhwat fi Ruang Sholat Masjid As-Sunnah", source: "Kenyamanan Bersama" },
             { type: 'text_akhwat', title: 'ADAB MEMBAWA ANAK', jp: '子供連れの礼拝マナー', desc: 'Mohon dekap Ananda saat Sholat berlangsung agar khusyuk jamaah terjaga.', icon: 'ph-leaf' },
@@ -872,7 +866,8 @@
 
         function updateClock() {
             const now = new Date();
-            el('time').innerText = now.toLocaleTimeString('en-GB', { hour12: false });
+            // Modifikasi spasi pada jam utama
+            el('time').innerText = now.toLocaleTimeString('en-GB', { hour12: false }).split(':').join(' : ');
             el('date').innerText = now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' });
             el('time-jkt').innerText = now.toLocaleTimeString('en-GB', { timeZone: 'Asia/Jakarta', hour: '2-digit', minute: '2-digit' });
             el('time-mek').innerText = now.toLocaleTimeString('en-GB', { timeZone: 'Asia/Riyadh', hour: '2-digit', minute: '2-digit' });
@@ -916,34 +911,30 @@
                 const dataP = await resP.json();
                 el('hijri').innerText = `${dataP.data.date.hijri.day} ${dataP.data.date.hijri.month.en} ${dataP.data.date.hijri.year}H`;
 
-                // MENGAMBIL DATA DARI SHEET MAS WAHYU (YANG LAMA)
                 const resS = await fetch(CONFIG.API_URL + "?v=" + new Date().getTime());
                 state.rawData = await resS.json();
 
                 renderPrayer(dataP.data.timings, state.rawData.iqamah);
                 renderWakafAndInfo(state.rawData.wakaf, state.rawData.config || {});
 
-                // --------- YOUTUBE KAJIAN LIVE (BACA DARI SHEET CONFIG) ---------
+                // --------- YOUTUBE KAJIAN LIVE ---------
                 const ytOverlay = el('youtube-overlay');
                 const ytFrame = el('youtube-frame');
 
-                // Mengecek apakah Mas Wahyu mengisi kolom youtube_id di sheet Config
                 if (state.rawData.config && state.rawData.config.youtube_id && state.rawData.config.youtube_id.trim() !== "") {
                     const ytId = state.rawData.config.youtube_id.trim();
                     const newSrc = `https://www.youtube-nocookie.com/embed/${ytId}?autoplay=1&mute=0&controls=0&modestbranding=1&rel=0`;
 
                     if (!ytFrame.src.includes(ytId)) {
-                        ytFrame.src = newSrc; // Inject video baru
+                        ytFrame.src = newSrc; 
                     }
-                    ytOverlay.classList.add('active'); // Buka layar hitam Youtube
+                    ytOverlay.classList.add('active'); 
                 } else {
-                    // Jika dihapus dari spreadsheet, tutup otomatis
                     if (ytOverlay.classList.contains('active')) {
                         ytOverlay.classList.remove('active');
                         ytFrame.src = "";
                     }
                 }
-                // ---------------------------------------------------------------
 
                 if (state.rawData.running_text) {
                     el('running-text').innerText = state.rawData.running_text.filter(r => r.id).map(r => `${r.id} (${r.jp})`).join("  ✦  ");
@@ -1013,7 +1004,6 @@
             if (item.type === 'sapaan' || item.type === 'quote') {
                 area.innerHTML = `<div class="text-arab">${item.arab}</div><div class="text-indo">"${item.indo}"</div><div class="text-source">${item.source}</div>`;
             } else if (item.type === 'text_akhwat') {
-                // Tampilan Khusus Pengumuman Akhwat DENGAN IKON BENDA MATI (Aman)
                 area.innerHTML = `
                     <div style="font-size: 10vh; color: var(--accent); margin-bottom: 2vh;"><i class="ph-fill ${item.icon}"></i></div>
                     <div style="font-size:5.5vh; font-weight:900; color:var(--text-main); line-height:1.2; text-transform:uppercase;">${item.title}</div>
@@ -1029,6 +1019,7 @@
             const now = new Date();
             let target = null; let type = ""; let name = ""; let prevTarget = null; let totalDur = 1; let passed = 0;
             const sorted = state.prayerToday.filter(p => p.name !== 'Syuruq').sort((a, b) => a.adzan - b.adzan);
+            
             for (let i = 0; i < sorted.length; i++) {
                 let p = sorted[i];
                 if (p.iqamah && now >= p.adzan && now < p.iqamah) { target = p.iqamah; type = "iqamah"; name = p.name; totalDur = p.iqamah - p.adzan; passed = now - p.adzan; break; }
@@ -1038,15 +1029,24 @@
                     totalDur = target - prevTarget; passed = now - prevTarget; break;
                 }
             }
+            
             if (!target && sorted.length > 0) {
                 target = new Date(sorted[0].adzan).setDate(new Date().getDate() + 1); type = "adzan"; name = sorted[0].name;
                 totalDur = target - sorted[sorted.length - 1].adzan; passed = now - sorted[sorted.length - 1].adzan;
             }
+            
             if (target) {
                 const diff = target - now;
-                el('cd-timer').innerText = `${Math.floor(diff / 3600000).toString().padStart(2, '0')}:${Math.floor((diff % 3600000) / 60000).toString().padStart(2, '0')}:${Math.floor((diff % 60000) / 1000).toString().padStart(2, '0')}`;
+                
+                // Modifikasi spasi pada teks hitung mundur
+                const h = Math.floor(diff / 3600000).toString().padStart(2, '0');
+                const m = Math.floor((diff % 3600000) / 60000).toString().padStart(2, '0');
+                const s = Math.floor((diff % 60000) / 1000).toString().padStart(2, '0');
+                el('cd-timer').innerText = `${h} : ${m} : ${s}`;
+                
                 el('cd-progress').style.width = Math.max(0, Math.min(100, 100 - ((passed / totalDur) * 100))) + "%";
                 highlightRow((type === 'iqamah') ? name : '');
+                
                 if (type === 'iqamah') {
                     el('cd-label').innerText = `IQAMAH ${name}`; el('cd-box').classList.add('alert');
                     if (diff < 5000 && diff > 4000) el('audio-chime').play().catch(e => { });
