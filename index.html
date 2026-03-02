@@ -1016,10 +1016,11 @@
                 el('wakaf-bar').style.width = pct + "%"; el('wakaf-percent').innerText = pct.toFixed(1) + "%";
             }
 
+            // QR CODE KHUSUS AKHWAT
             const linksAkhwat = [
-                { type: 'WA MUSLIMAH HEK', url: 'https://chat.whatsapp.com/GantiUrlGrupAkhwatDisini', desc: 'Grup Koordinasi Akhwat' },
-                { type: 'WAKAF MEK (LAND)', url: config.website || '#', desc: 'Pembebasan Lahan Masjid' },
-                { type: 'TPA ANAK HEK', url: 'https://assunnahhekinan.org/tpa-anak', desc: 'Info Kelas Belajar Anak' }
+                { type: 'GRUP WA MUSLIMAH', url: 'https://chat.whatsapp.com/GantiUrlGrupAkhwatDisini', desc: 'Grup Koordinasi Akhwat' },
+                { type: 'WAKAF LAHAN MASJID', url: config.website || '#', desc: 'Pembebasan Lahan Masjid' },
+                { type: 'TPA ANAK HEKINAN', url: 'https://assunnahhekinan.org/tpa-anak', desc: 'Info Kelas Belajar Anak' }
             ];
             let idx = 0;
             if (window.qrInterval) clearInterval(window.qrInterval);
