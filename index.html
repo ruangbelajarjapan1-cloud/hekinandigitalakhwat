@@ -234,6 +234,30 @@
         </div>
     </div>
 
+    <div id="poster-overlay" class="fullscreen-overlay" style="background: #000000; z-index: 90;">
+        <img id="poster-image" src="" style="width: 100vw; height: 100vh; object-fit: contain;">
+    </div>
+    
+    <div id="donasi-overlay" class="fullscreen-overlay" style="background: linear-gradient(135deg, var(--footer-bg), #121a0f); z-index: 85;">
+        <div style="font-size: 5vh; color: #fef08a; font-weight: 900; margin-bottom: 1vh; letter-spacing: 2px;">SALURKAN INFAQ & WAKAF TERBAIK ANDA</div>
+        <div style="font-size: 3vh; color: #cbd5e1; margin-bottom: 5vh;">“Perumpamaan orang yang menginfakkan hartanya di jalan Allah...” (QS. Al-Baqarah: 261)</div>
+
+        <div style="display: flex; gap: 4vw; align-items: center; background: white; padding: 4vh 4vw; border-radius: 1vw; box-shadow: 0 20px 40px rgba(0,0,0,0.5);">
+            <div style="background: white; padding: 1vh; border-radius: 1vw; border: 2px solid var(--glass-border);">
+                <div id="donasi-qr"></div>
+            </div>
+            <div style="text-align: left; color: #0f172a;">
+                <div style="font-size: 3vh; font-weight: 800; color: #64748b; margin-bottom: 0.5vh; text-transform: uppercase;" id="donasi-bank">JAPAN POST BANK (YUCHO)</div>
+                <div style="font-size: 7vh; font-weight: 900; color: var(--primary); letter-spacing: 2px; line-height: 1.1;" id="donasi-rek">12345 - 67890121</div>
+                <div style="font-size: 3.5vh; font-weight: 800; margin-top: 1vh; color: #0f172a;" id="donasi-nama">A.N. RBM JAPAN</div>
+            </div>
+        </div>
+        
+        <div style="font-size: 3vh; color: white; margin-top: 5vh; font-weight: 600;">
+            <i class="ph-fill ph-device-mobile"></i> Scan QR Code menggunakan M-Banking atau Aplikasi Pembayaran
+        </div>
+    </div>
+
     <div id="youtube-overlay" class="fullscreen-overlay">
         <div class="live-badge"><span class="live-dot"></span> KAJIAN LIVE</div>
         <iframe id="youtube-frame" src="" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen style="width:100%; height:100%; pointer-events:none;"></iframe>
@@ -357,7 +381,7 @@
             { type: 'text_akhwat', title: 'JAGA KEBERSIHAN', jp: '衛生・美化の維持', desc: 'Mohon buang sampah pampers/snack ananda pada tempatnya. Syukron.', icon: 'ph-sparkle' }
         ];
 
-        let state = { prayerToday: [], playlist: [], slideIndex: 0, khatibData: null, isRamadan: false, hijriDay: 0, kereta: null };
+        let state = { prayerToday: [], playlist: [], slideIndex: 0, khatibData: null, isRamadan: false, isSyawal: false, hijriDay: 0, kereta: null };
         let lastPlayedEvent = ""; 
 
         const el = (id) => document.getElementById(id);
@@ -409,6 +433,9 @@
                 else if (hour >= 18 || hour < 2) momentText = "MARHABAN YA RAMADHAN";
                 else if (day === 5) momentText = "JUMAT MUBARAK";
                 else if (hour >= 7 && hour < 11) momentText = "WAKTU DHUHA";
+            } else if (state.isSyawal && state.hijriDay >= 1 && state.hijriDay <= 7) {
+                // Logika Syawal 1-7 (Idul Fitri)
+                momentText = "تَقَبَّلَ اللَّهُ مِنَّا وَمِنْكُمْ"; 
             } else {
                 if (isAyyamulBidh && hour >= 4 && hour < 18) momentText = "PUASA AYYAMUL BIDH";
                 else if (day === 5) momentText = "JUMAT MUBARAK";
@@ -472,13 +499,30 @@
                     weatherIcon.className = "ph-fill ph-cloud"; 
                 }
 
-                const nowUnix = Math.floor(Date.now() / 1000);
+                const now = new Date();
+                const nowUnix = Math.floor(now.getTime() / 1000);
+                
+                // 1. Ambil data Jadwal Sholat untuk hari ini
                 const resP = await fetch(`https://api.aladhan.com/v1/timings/${nowUnix}?latitude=${CONFIG.LAT}&longitude=${CONFIG.LONG}&method=1&adjustment=${CONFIG.HIJRI_OFFSET}&calendarMethod=MATHEMATICAL`);
                 const dataP = await resP.json();
-                el('hijri').innerText = `${dataP.data.date.hijri.day} ${dataP.data.date.hijri.month.en} ${dataP.data.date.hijri.year}H`;
                 
-                state.isRamadan = (dataP.data.date.hijri.month.number === 9);
-                state.hijriDay = parseInt(dataP.data.date.hijri.day);
+                // 2. LOGIKA PERGANTIAN HARI HIJRIAH (MAGHRIB)
+                const maghribTime = createDate(dataP.data.timings.Maghrib);
+                let hijriData = dataP.data.date.hijri;
+
+                // Cek jika jam sekarang >= jam Maghrib hari ini
+                if (now >= maghribTime) {
+                    const tomorrowUnix = nowUnix + 86400; 
+                    const resBesok = await fetch(`https://api.aladhan.com/v1/timings/${tomorrowUnix}?latitude=${CONFIG.LAT}&longitude=${CONFIG.LONG}&method=1&adjustment=${CONFIG.HIJRI_OFFSET}&calendarMethod=MATHEMATICAL`);
+                    const dataBesok = await resBesok.json();
+                    hijriData = dataBesok.data.date.hijri;
+                }
+
+                el('hijri').innerText = `${hijriData.day} ${hijriData.month.en} ${hijriData.year}H`;
+                
+                state.isRamadan = (hijriData.month.number === 9);
+                state.isSyawal = (hijriData.month.number === 10);
+                state.hijriDay = parseInt(hijriData.day);
 
                 // PENAMBAHAN ?screen=akhwat DI FETCH DATA
                 const resS = await fetch(CONFIG.API_URL + "?screen=akhwat&v=" + new Date().getTime());
@@ -610,30 +654,70 @@
         }
 
         function updatePlaylist(json) {
-            let list = [...ISLAMIC_CONTENT_AKHWAT]; 
+            let texts = [];
+            let visuals = [];
+
             const greet = getGreeting(); 
-            list.unshift({ type: 'sapaan', ...greet });
+            texts.push({ type: 'sapaan', ...greet });
             
-            // Masukkan Pengumuman dari Google Sheet
+            // Masukkan Donasi
+            visuals.push({
+                type: 'donasi',
+                bank: 'JAPAN POST BANK (YUCHO)',
+                rek: '12160-00457031',
+                nama: 'A.N. Yoshimine Adelfa',
+                qrData: 'https://assunnahhekinan.org/donasi'
+            });
+
+            // Masukkan Pengumuman dari Google Sheet khusus Akhwat
             if(json.pengumuman && json.pengumuman.length > 0) {
                 json.pengumuman.forEach(p => { 
-                    if(p.id) list.push({ type:'text_akhwat', title: '📢 INFO MASJID', jp: p.id, desc: p.jp, icon: 'ph-megaphone' }); 
+                    if(p.id) texts.push({ type:'text_akhwat', title: '📢 INFO MASJID', jp: p.id, desc: p.jp, icon: 'ph-megaphone' }); 
                 });
             }
             
             if(json.galeri) {
                 json.galeri.forEach(g => { 
-                    if(g) list.push({ type:'image', url:g }); 
+                    if(g) visuals.push({ type:'image', url:g }); 
                 });
+            }
+            
+            if(json.hadits && json.hadits.length > 0) {
+                json.hadits.forEach(h => {
+                    texts.push({ type: 'quote', arab: h.arab, indo: h.indo, source: h.source });
+                });
+            } else {
+                ISLAMIC_CONTENT_AKHWAT.forEach(h => texts.push(h));
+            }
+
+            // --- LOGIKA SELANG-SELING (INTERLEAVE) ---
+            let list = [];
+            let maxLength = Math.max(texts.length, visuals.length);
+            for(let i = 0; i < maxLength; i++) {
+                if(i < texts.length) list.push(texts[i]);
+                if(i < visuals.length) list.push(visuals[i]);
             }
             
             state.playlist = list;
             if(json.khatib && json.khatib.id) state.khatibData = json.khatib;
         }
 
+        let slideTimer;
+
         function rotateSlide() {
-            if(!state.playlist.length) return;
+            clearTimeout(slideTimer);
+
+            if(!state.playlist.length) {
+                slideTimer = setTimeout(rotateSlide, 5000);
+                return;
+            }
+            
             const now = new Date();
+            const posterOverlay = el('poster-overlay');
+            if(posterOverlay) posterOverlay.classList.remove('active');
+            
+            const donasiOverlay = el('donasi-overlay');
+            if(donasiOverlay) donasiOverlay.classList.remove('active');
             
             if(now.getDay() === 5 && now.getHours() >= 4 && now.getHours() < 13 && state.khatibData) {
                 const k = state.khatibData;
@@ -642,6 +726,7 @@
                     <div style="font-size:6vh; font-weight:900; color:var(--text-main); line-height:1.2;">${k.id}</div>
                     <div style="font-size:3.5vh; color:var(--primary); margin-top:2vh;">${k.jp}</div>
                 `;
+                slideTimer = setTimeout(rotateSlide, 10000);
                 return;
             }
 
@@ -649,6 +734,9 @@
             const item = state.playlist[state.slideIndex]; 
             const area = el('slide-content');
             
+            // --- PENGATURAN DURASI DINAMIS ---
+            let slideDuration = 10000; // Default 10 detik
+
             if(item.type === 'sapaan') {
                 area.innerHTML = `<div class="sapaan-arab">${item.title}</div><div class="sapaan-sub">${item.sub}</div>`;
             } else if(item.type === 'quote') {
@@ -679,18 +767,40 @@
                     <div style="width:100%;">${listHTML}</div>
                 `; 
             } else if(item.type === 'image') {
-                area.innerHTML = `<img src="${item.url}" style="width:100%; max-height:45vh; object-fit:contain;" onerror="this.style.display='none'">`;
+                if(posterOverlay) {
+                    el('poster-image').src = item.url;
+                    posterOverlay.classList.add('active');
+                }
+                area.innerHTML = `<div style="font-size:3vh; color:var(--text-sub); font-weight:bold;">Menampilkan Poster...</div>`;
+                slideDuration = 15000; // 15 Detik
+            } else if(item.type === 'donasi') {
+                if(donasiOverlay) {
+                    donasiOverlay.classList.add('active');
+                    el('donasi-bank').innerText = item.bank;
+                    el('donasi-rek').innerText = item.rek;
+                    el('donasi-nama').innerText = item.nama;
+
+                    const qrBox = el('donasi-qr');
+                    if (qrBox && qrBox.innerHTML === "") {
+                        new QRCode(qrBox, { text: item.qrData, width: 250, height: 250 });
+                    }
+                }
+                area.innerHTML = `<div style="font-size:3vh; color:var(--text-sub); font-weight:bold;">Menampilkan Info Donasi...</div>`;
+                slideDuration = 15000; // 15 Detik
             }
 
             const bar = el('slide-bar');
             if (bar) { 
                 bar.classList.remove('anim-progress'); 
                 void bar.offsetWidth; 
+                bar.style.animationDuration = (slideDuration / 1000) + 's';
                 bar.classList.add('anim-progress'); 
             }
+
+            slideTimer = setTimeout(rotateSlide, slideDuration);
         }
         
-        rotateSlide(); setInterval(rotateSlide, 10000);
+        rotateSlide(); 
 
         function updateLogic() {
             const now = new Date(); 
@@ -703,7 +813,11 @@
             
             for(let i=0; i < sortedPrayers.length; i++) {
                 let p = sortedPrayers[i];
-                if(p.iqamah && now >= p.adzan && now < p.iqamah) { 
+                
+                // Waktu iqamah ditambah 5 menit (5 * 60 * 1000 ms) agar layar shaf bertahan
+                let waktuSelesaiIqamah = p.iqamah ? new Date(p.iqamah.getTime() + (5 * 60 * 1000)) : null;
+
+                if(p.iqamah && now >= p.adzan && now < waktuSelesaiIqamah) { 
                     target = p.iqamah; type = "iqamah"; name = p.name; 
                     highlightRow(p.name); 
                     
@@ -750,7 +864,15 @@
             const timerBox = el('cd-timer'); const labelBox = el('cd-label'); const boxContainer = el('cd-box');
             
             if(target) {
-                const diff = target - now;
+                let diff = target - now;
+                let isHold = false;
+
+                // Kunci waktu di angka 0 jika waktu Iqamah sudah lewat (saat mode HOLD 5 menit)
+                if (diff < 0) {
+                    diff = 0;
+                    isHold = true;
+                }
+
                 const h = Math.floor(diff/3600000).toString().padStart(2,'0');
                 const m = Math.floor((diff%3600000)/60000).toString().padStart(2,'0');
                 const s = Math.floor((diff%60000)/1000).toString().padStart(2,'0');
@@ -763,17 +885,25 @@
                 }
                 
                 if(type === 'iqamah') {
-                    labelBox.innerHTML = `IQAMAH ${name} <span style="font-size:0.6em; display:block; color:#94a3b8;">START / 開始</span>`;
-                    boxContainer.classList.add('alert'); el('adzan-overlay').classList.remove('active'); 
-                    
-                    let currentEventId = "iqamah_" + target.getTime();
-                    if(diff < 5000 && diff > 0 && lastPlayedEvent !== currentEventId) { 
-                        playAudio('iqamah');
-                        lastPlayedEvent = currentEventId;
-                    }
+                    if (isHold) {
+                        // Tampilan saat ditahan 5 menit setelah nol (Sholat Berlangsung)
+                        labelBox.innerHTML = `SHOLAT ${name} <span style="font-size:0.6em; display:block; color:#94a3b8;">IN PROGRESS / 礼拝中</span>`;
+                        boxContainer.classList.add('alert'); 
+                        el('adzan-overlay').classList.remove('active'); 
+                        el('shaf-overlay').classList.add('active'); // Tahan layar himbauan shaf
+                    } else {
+                        labelBox.innerHTML = `IQAMAH ${name} <span style="font-size:0.6em; display:block; color:#94a3b8;">START / 開始</span>`;
+                        boxContainer.classList.add('alert'); el('adzan-overlay').classList.remove('active'); 
+                        
+                        let currentEventId = "iqamah_" + target.getTime();
+                        if(diff < 5000 && diff > 0 && lastPlayedEvent !== currentEventId) { 
+                            playAudio('iqamah');
+                            lastPlayedEvent = currentEventId;
+                        }
 
-                    if (diff <= 1000 && diff > -600000) el('shaf-overlay').classList.add('active'); 
-                    else el('shaf-overlay').classList.remove('active');
+                        if (diff <= 1000 && diff > -600000) el('shaf-overlay').classList.add('active'); 
+                        else el('shaf-overlay').classList.remove('active');
+                    }
                 } else {
                     if (state.isRamadan && name === 'Maghrib') {
                         labelBox.innerHTML = `MENUJU BUKA PUASA <span style="font-size:0.6em; display:block; color:#64748b;">IFTAR / イフタール</span>`;
@@ -801,7 +931,6 @@
                 el('cd-progress').style.width = "0%";
             }
         }
-        
         setInterval(updateLogic, 1000);
 
         function highlightRow(name) {
