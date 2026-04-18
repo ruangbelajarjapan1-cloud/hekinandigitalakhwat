@@ -186,12 +186,12 @@
 
         body.deep-sleep { filter: brightness(0.8); } 
 
-       /* YOUTUBE LIVE OVERLAY (PICTURE-IN-PICTURE) */
+        /* YOUTUBE LIVE OVERLAY (PICTURE-IN-PICTURE) */
         #youtube-overlay {
             position: fixed;
             top: 16.5vh; 
             left: 1.5vw; 
-            width: 68vw; /* Video hanya menutupi kiri dan tengah */
+            width: 68vw; 
             height: 74vh; 
             background: #000; 
             z-index: 95;
@@ -273,7 +273,7 @@
         </div>
     </div>
 
- <div id="youtube-overlay">
+    <div id="youtube-overlay">
         <div class="live-badge"><span class="live-dot"></span> KAJIAN LIVE</div>
         
         <div style="position: absolute; bottom: 2vh; left: 2vw; background: white; padding: 1.5vh; border-radius: 1vw; display: flex; align-items: center; gap: 1vw; z-index: 200; box-shadow: 0 10px 20px rgba(0,0,0,0.5);">
@@ -556,6 +556,14 @@
                 renderWakafAndInfo(jsonS.wakaf, jsonS.config || {});
                 updatePlaylist(jsonS);
                 
+                if(jsonS.kereta) state.kereta = jsonS.kereta;
+
+                if(jsonS.running_text) {
+                    const validRT = jsonS.running_text.filter(r => r.id);
+                    if(validRT.length) {
+                        el('running-text').innerText = validRT.map(r => `${r.id} (${r.jp})`).join("  ✦  ");
+                    }
+                }
             } catch (e) { console.log("Fetch Error", e); }
         }
         
@@ -953,7 +961,7 @@
             }
         }
 
-       // ==========================================================
+        // ==========================================================
         // FITUR YOUTUBE LIVE (PICTURE-IN-PICTURE & SMART MUTE & Q&A)
         // ==========================================================
         let currentTvLiveId = "";
