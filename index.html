@@ -184,18 +184,13 @@
         #khutbah-overlay { background: #1a1a1a; }
         .khutbah-text { font-size: 8vh; color: white; font-weight: 800; text-align: center; line-height: 1.2; }
 
-        /* YOUTUBE LIVE OVERLAY KHUSUS KAJIAN */
+        body.deep-sleep { filter: brightness(0.8); } 
+
+        /* YOUTUBE LIVE OVERLAY KHUSUS KAJIAN (Z-INDEX 95) */
         #youtube-overlay { background: #000000; z-index: 95; }
         .live-badge { position: absolute; top: 4vh; left: 3vw; color: white; z-index: 201; font-size: 3vh; font-weight: 800; background: rgba(239, 68, 68, 0.9); padding: 1vh 2vw; border-radius: 50px; display: flex; align-items: center; gap: 1vw; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); }
         .live-dot { display: inline-block; width: 1.5vh; height: 1.5vh; background: white; border-radius: 50%; animation: blink 1.5s infinite; }
         @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.2; } 100% { opacity: 1; } }
-
-        body.deep-sleep { filter: brightness(0.8); } 
-        /* YOUTUBE LIVE OVERLAY KHUSUS KAJIAN */
-#youtube-overlay { background: #000000; z-index: 200; }
-.live-badge { position: absolute; top: 4vh; left: 3vw; color: white; z-index: 201; font-size: 3vh; font-weight: 800; background: rgba(239, 68, 68, 0.9); padding: 1vh 2vw; border-radius: 50px; display: flex; align-items: center; gap: 1vw; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); }
-.live-dot { display: inline-block; width: 1.5vh; height: 1.5vh; background: white; border-radius: 50%; animation: blink 1.5s infinite; }
-@keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.2; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
@@ -265,12 +260,9 @@
 
     <div id="youtube-overlay" class="fullscreen-overlay">
         <div class="live-badge"><span class="live-dot"></span> KAJIAN LIVE</div>
-        <iframe id="youtube-frame" src="" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen style="width:100%; height:100%; pointer-events:none;"></iframe>
+        <iframe id="youtube-frame" src="" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen style="width:100%; height:100%; border:none;"></iframe>
     </div>
-<div id="youtube-overlay" class="fullscreen-overlay">
-    <div class="live-badge"><span class="live-dot"></span> KAJIAN LIVE</div>
-    <iframe id="youtube-frame" src="" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen style="width:100%; height:100%; border:none;"></iframe>
-</div>
+
     <header>
         <div class="header-left">
             <img src="logohekinan.png" alt="Logo" class="logo" onerror="this.src='logohekinan.jpeg'">
@@ -540,7 +532,6 @@
                 renderWakafAndInfo(jsonS.wakaf, jsonS.config || {});
                 updatePlaylist(jsonS);
                 
-               
             } catch (e) { console.log("Fetch Error", e); }
         }
         
@@ -607,7 +598,6 @@
                 el('wakaf-percent').innerText = pct.toFixed(1) + "%";
             }
             
-        
           // LINK QR CODE KHUSUS AKHWAT
             const links = [
                 { type: 'KONTAK ADMIN', url: 'https://wa.me/818012345678', desc: 'Hubungi Pengurus Akhwat' },
@@ -879,6 +869,7 @@
                         el('adzan-overlay').classList.remove('active'); 
                         el('shaf-overlay').classList.add('active'); // Tahan layar himbauan shaf
                     } else {
+                        // Tampilan saat hitung mundur Iqamah masih berjalan
                         labelBox.innerHTML = `IQAMAH ${name} <span style="font-size:0.6em; display:block; color:#94a3b8;">START / 開始</span>`;
                         boxContainer.classList.add('alert'); el('adzan-overlay').classList.remove('active'); 
                         
@@ -937,130 +928,76 @@
                 });
             }
         }
+
         // ==========================================
-// FITUR AUTO-NOBAR YOUTUBE LIVE
-// ==========================================
-let currentTvLiveId = "";
-
-async function cekLiveUntukTV() {
-    // Ini adalah link CSV "Setelan" dari Google Sheets Anda
-    const CSV_SETELAN = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSlE8S0iOWE3ssrAkrsm1UE_qMfFZAHLXD057zfZslsu1VCdiIDI2jdHc_gjGBOKqQFFo-iLYouGwm9/pub?gid=1608872178&single=true&output=csv"; 
-    
-    try {
-        // Parameter &t= ditambahkan agar TV selalu mengambil data terbaru (tidak nyangkut di cache)
-        const response = await fetch(CSV_SETELAN + "&t=" + new Date().getTime());
-        const text = await response.text();
-        
-        // Membaca baris per baris dari file CSV
-        const rows = text.split('\n');
-        let foundId = "";
-        
-        for (let row of rows) {
-            const cols = row.split(',');
-            // Mencari kata "live_id" di kolom pertama
-            if (cols[0] && cols[0].trim() === "live_id" && cols[1]) {
-                foundId = cols[1].trim().replace(/['"\r]/g, ''); // Bersihkan karakter sisa
-                break;
-            }
-        }
-
-        const ytOverlay = document.getElementById("youtube-overlay");
-        const ytFrame = document.getElementById("youtube-frame");
-
-        if (foundId && foundId !== "") {
-            // Jika ada Live terdeteksi dan ID-nya baru
-            if (currentTvLiveId !== foundId) {
-                currentTvLiveId = foundId;
-                // Masukkan video ke iframe dan paksa autoplay
-                ytFrame.src = `https://www.youtube.com/embed/${foundId}?autoplay=1&mute=0&controls=0&modestbranding=1`;
-                ytOverlay.classList.add("active");
-            }
-        } else {
-            // Jika ID kosong (sedang tidak live)
-            if (currentTvLiveId !== "") {
-                currentTvLiveId = "";
-                ytFrame.src = ""; // Hapus video agar memori TV tidak berat
-                ytOverlay.classList.remove("active"); // Sembunyikan layar hitam
-            }
-        }
-    } catch (e) {
-        console.error("Gagal mengecek status Live untuk TV", e);
-    }
-}
-
-// 1. Jalankan langsung saat TV pertama kali dinyalakan
-cekLiveUntukTV();
-
-// 2. Pasang alarm agar TV mengecek Google Sheets setiap 2 menit (120000 milidetik)
-setInterval(cekLiveUntukTV, 120000);
+        // FITUR AUTO-NOBAR YOUTUBE LIVE (SMART MUTE)
         // ==========================================
-// FITUR AUTO-NOBAR YOUTUBE LIVE (SMART MUTE)
-// ==========================================
-let currentTvLiveId = "";
+        let currentTvLiveId = "";
 
-async function cekLiveUntukTV() {
-    // Link CSV "Setelan" Google Sheets Anda
-    const CSV_SETELAN = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSlE8S0iOWE3ssrAkrsm1UE_qMfFZAHLXD057zfZslsu1VCdiIDI2jdHc_gjGBOKqQFFo-iLYouGwm9/pub?gid=1608872178&single=true&output=csv"; 
-    
-    // Cek apakah layar TV sedang menampilkan peringatan Sholat/Khutbah
-    const adzanAktif = document.getElementById('adzan-overlay').classList.contains('active');
-    const shafAktif = document.getElementById('shaf-overlay').classList.contains('active');
-    const khutbahAktif = document.getElementById('khutbah-overlay').classList.contains('active');
-    const lagiSholat = adzanAktif || shafAktif || khutbahAktif;
+        async function cekLiveUntukTV() {
+            // Link CSV "Setelan" Google Sheets Anda
+            const CSV_SETELAN = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSlE8S0iOWE3ssrAkrsm1UE_qMfFZAHLXD057zfZslsu1VCdiIDI2jdHc_gjGBOKqQFFo-iLYouGwm9/pub?gid=1608872178&single=true&output=csv"; 
+            
+            // Cek apakah layar TV sedang menampilkan peringatan Sholat/Khutbah
+            const adzanAktif = document.getElementById('adzan-overlay').classList.contains('active');
+            const shafAktif = document.getElementById('shaf-overlay').classList.contains('active');
+            const khutbahAktif = document.getElementById('khutbah-overlay').classList.contains('active');
+            const lagiSholat = adzanAktif || shafAktif || khutbahAktif;
 
-    try {
-        const response = await fetch(CSV_SETELAN + "&t=" + new Date().getTime());
-        const text = await response.text();
-        const rows = text.split('\n');
-        
-        let foundId = "";
-        for (let row of rows) {
-            const cols = row.split(',');
-            if (cols[0] && cols[0].trim() === "live_id" && cols[1]) {
-                foundId = cols[1].trim().replace(/['"\r]/g, '');
-                break;
+            try {
+                const response = await fetch(CSV_SETELAN + "&t=" + new Date().getTime());
+                const text = await response.text();
+                const rows = text.split('\n');
+                
+                let foundId = "";
+                for (let row of rows) {
+                    const cols = row.split(',');
+                    if (cols[0] && cols[0].trim() === "live_id" && cols[1]) {
+                        foundId = cols[1].trim().replace(/['"\r]/g, '');
+                        break;
+                    }
+                }
+
+                const ytOverlay = document.getElementById("youtube-overlay");
+                const ytFrame = document.getElementById("youtube-frame");
+
+                // LOGIKA PINTAR: Jika sedang waktu sholat, matikan video & suaranya!
+                if (lagiSholat) {
+                    if (ytOverlay.classList.contains("active")) {
+                        ytFrame.src = ""; // Mengosongkan SRC akan mematikan video & suara
+                        ytOverlay.classList.remove("active");
+                        currentTvLiveId = ""; // Reset agar video di-load ulang setelah sholat selesai
+                    }
+                    return; // Berhenti mengeksekusi kode di bawahnya
+                }
+
+                // LOGIKA NORMAL: Jika tidak sedang sholat
+                if (foundId && foundId !== "") {
+                    // Putar video hanya jika ID-nya baru (menghindari video mengulang terus)
+                    if (currentTvLiveId !== foundId) {
+                        currentTvLiveId = foundId;
+                        ytFrame.src = `https://www.youtube.com/embed/${foundId}?autoplay=1&mute=0&controls=0&modestbranding=1`;
+                        ytOverlay.classList.add("active");
+                    }
+                } else {
+                    // Sembunyikan jika ID di Google Sheets dikosongkan
+                    if (currentTvLiveId !== "") {
+                        currentTvLiveId = "";
+                        ytFrame.src = ""; 
+                        ytOverlay.classList.remove("active"); 
+                    }
+                }
+            } catch (e) {
+                console.error("Gagal mengecek status Live", e);
             }
         }
 
-        const ytOverlay = document.getElementById("youtube-overlay");
-        const ytFrame = document.getElementById("youtube-frame");
+        // 1. Jalankan langsung saat TV pertama kali dinyalakan
+        cekLiveUntukTV();
 
-        // LOGIKA PINTAR: Jika sedang waktu sholat, matikan video & suaranya!
-        if (lagiSholat) {
-            if (ytOverlay.classList.contains("active")) {
-                ytFrame.src = ""; // Mengosongkan SRC akan mematikan video & suara
-                ytOverlay.classList.remove("active");
-                currentTvLiveId = ""; // Reset agar video di-load ulang setelah sholat selesai
-            }
-            return; // Berhenti mengeksekusi kode di bawahnya
-        }
+        // 2. Cek setiap 30 detik agar sangat responsif kembali menyala setelah sholat
+        setInterval(cekLiveUntukTV, 30000);
 
-        // LOGIKA NORMAL: Jika tidak sedang sholat
-        if (foundId && foundId !== "") {
-            // Putar video hanya jika ID-nya baru (menghindari video mengulang terus)
-            if (currentTvLiveId !== foundId) {
-                currentTvLiveId = foundId;
-                ytFrame.src = `https://www.youtube.com/embed/${foundId}?autoplay=1&mute=0&controls=0&modestbranding=1`;
-                ytOverlay.classList.add("active");
-            }
-        } else {
-            // Sembunyikan jika ID di Google Sheets dikosongkan
-            if (currentTvLiveId !== "") {
-                currentTvLiveId = "";
-                ytFrame.src = ""; 
-                ytOverlay.classList.remove("active"); 
-            }
-        }
-    } catch (e) {
-        console.error("Gagal mengecek status Live", e);
-    }
-}
-
-// 1. Jalankan langsung saat TV pertama kali dinyalakan
-cekLiveUntukTV();
-
-// 2. Cek setiap 30 detik agar sangat responsif kembali menyala setelah sholat
-setInterval(cekLiveUntukTV, 30000);
     </script>
 </body>
 </html>
