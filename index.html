@@ -186,25 +186,18 @@
 
         body.deep-sleep { filter: brightness(0.8); } 
 
-        /* YOUTUBE LIVE OVERLAY (PICTURE-IN-PICTURE) */
+        /* YOUTUBE LIVE OVERLAY (DI DALAM KOTAK SLIDE TENGAH) */
         #youtube-overlay {
-            position: fixed;
-            top: 16.5vh; 
-            left: 1.5vw; 
-            width: 68vw; 
-            height: 74vh; 
+            position: absolute; 
+            top: 0; left: 0; width: 100%; height: 100%; 
             background: #000; 
-            z-index: 95;
-            border-radius: 1.5vw; 
-            border: 3px solid var(--primary);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+            z-index: 50;
             opacity: 0; pointer-events: none; transition: opacity 0.5s;
-            overflow: hidden;
         }
         #youtube-overlay.active { opacity: 1; pointer-events: auto; }
         
-        .live-badge { position: absolute; top: 3vh; left: 2vw; color: white; z-index: 201; font-size: 2.5vh; font-weight: 800; background: rgba(239, 68, 68, 0.9); padding: 1vh 2vw; border-radius: 50px; display: flex; align-items: center; gap: 1vw; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); }
-        .live-dot { display: inline-block; width: 1.5vh; height: 1.5vh; background: white; border-radius: 50%; animation: blink 1.5s infinite; }
+        .live-badge { position: absolute; top: 2vh; left: 1.5vw; color: white; z-index: 201; font-size: 2vh; font-weight: 800; background: rgba(239, 68, 68, 0.9); padding: 0.5vh 1.5vw; border-radius: 50px; display: flex; align-items: center; gap: 0.5vw; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); }
+        .live-dot { display: inline-block; width: 1vh; height: 1vh; background: white; border-radius: 50%; animation: blink 1.5s infinite; }
         @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.2; } 100% { opacity: 1; } }
     </style>
 </head>
@@ -273,20 +266,6 @@
         </div>
     </div>
 
-    <div id="youtube-overlay">
-        <div class="live-badge"><span class="live-dot"></span> KAJIAN LIVE</div>
-        
-        <div style="position: absolute; bottom: 2vh; left: 2vw; background: white; padding: 1.5vh; border-radius: 1vw; display: flex; align-items: center; gap: 1vw; z-index: 200; box-shadow: 0 10px 20px rgba(0,0,0,0.5);">
-            <div id="qa-qr"></div>
-            <div style="color: #0f172a;">
-                <div style="font-size: 2vh; font-weight: 900; color: #689f38;">TANYA USTADZ</div>
-                <div style="font-size: 1.4vh; font-weight: 700;">Scan QR untuk bertanya</div>
-            </div>
-        </div>
-
-        <iframe id="youtube-frame" src="" frameborder="0" allow="autoplay; encrypted-media" style="width:100%; height:100%; border:none;"></iframe>
-    </div>
-
     <header>
         <div class="header-left">
             <img src="logohekinan.png" alt="Logo" class="logo" onerror="this.src='logohekinan.jpeg'">
@@ -340,11 +319,26 @@
                 <div class="cd-timer" id="cd-timer">-- : -- : --</div>
                 <div class="cd-progress-track"><div class="cd-progress-fill" id="cd-progress"></div></div>
             </div>
+            
             <div class="slide-container" id="slide-area">
                 <div class="slide-content" id="slide-content">
                     <div class="sapaan-arab">السلام عليكم ورحمة الله وبركاته</div>
                 </div>
                 <div class="slide-progress-bar"><div class="slide-progress-fill" id="slide-bar"></div></div>
+
+                <div id="youtube-overlay">
+                    <div class="live-badge"><span class="live-dot"></span> KAJIAN LIVE</div>
+                    
+                    <div style="position: absolute; bottom: 1.5vh; left: 1.5vw; background: rgba(255,255,255,0.95); padding: 1vh; border-radius: 1vw; display: flex; align-items: center; gap: 0.8vw; z-index: 200; box-shadow: 0 10px 20px rgba(0,0,0,0.5);">
+                        <div id="qa-qr"></div>
+                        <div style="color: #0f172a; text-align: left;">
+                            <div style="font-size: 1.6vh; font-weight: 900; color: var(--primary);">TANYA USTADZ</div>
+                            <div style="font-size: 1.2vh; font-weight: 700;">Scan QR untuk bertanya</div>
+                        </div>
+                    </div>
+
+                    <iframe id="youtube-frame" src="" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen style="width:100%; height:100%; border:none;"></iframe>
+                </div>
             </div>
         </div>
 
@@ -374,7 +368,7 @@
                     <div style="background: white; padding: 1vh; border-radius: 1vw; display: inline-block;">
                         <div id="qrcode-dynamic"></div>
                     </div>
-                    <div id="qr-desc">Ruang Akhwat</div>
+                    <div id="qr-desc">Website Resmi</div>
                 </div>
             </div>
         </div>
@@ -458,7 +452,6 @@
                 else if (day === 5) momentText = "JUMAT MUBARAK";
                 else if (hour >= 7 && hour < 11) momentText = "WAKTU DHUHA";
             } else if (state.isSyawal && state.hijriDay >= 1 && state.hijriDay <= 7) {
-                // Logika Syawal 1-7 (Idul Fitri)
                 momentText = "تَقَبَّلَ اللَّهُ مِنَّا وَمِنْكُمْ"; 
             } else {
                 if (isAyyamulBidh && hour >= 4 && hour < 18) momentText = "PUASA AYYAMUL BIDH";
@@ -630,7 +623,6 @@
                 el('wakaf-percent').innerText = pct.toFixed(1) + "%";
             }
             
-          // LINK QR CODE KHUSUS AKHWAT
             const links = [
                 { type: 'KONTAK ADMIN', url: 'https://wa.me/818012345678', desc: 'Hubungi Pengurus Akhwat' },
                 { type: 'WAKAF LAHAN MASJID', url: config.website || 'https://assunnahhekinan.org', desc: 'Pembebasan Lahan Masjid' },
@@ -663,8 +655,8 @@
         }
 
         function updatePlaylist(json) {
-            let texts = [];
-            let visuals = [];
+            let texts = [];   // Wadah untuk sapaan, info, hadits, adab
+            let visuals = []; // Wadah untuk poster dan donasi
 
             const greet = getGreeting(); 
             texts.push({ type: 'sapaan', ...greet });
@@ -696,7 +688,7 @@
                     texts.push({ type: 'quote', arab: h.arab, indo: h.indo, source: h.source });
                 });
             } else {
-                ISLAMIC_CONTENT_AKHWAT.forEach(h => texts.push(h));
+                ISLAMIC_CONTENT_AKHWAT.forEach(h => texts.push(h)); 
             }
 
             // --- LOGIKA SELANG-SELING (INTERLEAVE) ---
@@ -727,7 +719,7 @@
             
             const donasiOverlay = el('donasi-overlay');
             if(donasiOverlay) donasiOverlay.classList.remove('active');
-            
+
             if(now.getDay() === 5 && now.getHours() >= 4 && now.getHours() < 13 && state.khatibData) {
                 const k = state.khatibData;
                 el('slide-content').innerHTML = `
@@ -742,9 +734,9 @@
             state.slideIndex = (state.slideIndex + 1) % state.playlist.length;
             const item = state.playlist[state.slideIndex]; 
             const area = el('slide-content');
-            
-            // --- PENGATURAN DURASI DINAMIS ---
-            let slideDuration = 10000; // Default 10 detik
+
+            // --- PENGATURAN DURASI ---
+            let slideDuration = 10000; // Durasi default (teks, sapaan, adab) 10 detik
 
             if(item.type === 'sapaan') {
                 area.innerHTML = `<div class="sapaan-arab">${item.title}</div><div class="sapaan-sub">${item.sub}</div>`;
@@ -781,7 +773,7 @@
                     posterOverlay.classList.add('active');
                 }
                 area.innerHTML = `<div style="font-size:3vh; color:var(--text-sub); font-weight:bold;">Menampilkan Poster...</div>`;
-                slideDuration = 15000; // 15 Detik
+                slideDuration = 15000; // Poster 15 detik
             } else if(item.type === 'donasi') {
                 if(donasiOverlay) {
                     donasiOverlay.classList.add('active');
@@ -795,7 +787,7 @@
                     }
                 }
                 area.innerHTML = `<div style="font-size:3vh; color:var(--text-sub); font-weight:bold;">Menampilkan Info Donasi...</div>`;
-                slideDuration = 15000; // 15 Detik
+                slideDuration = 15000; // Donasi 15 detik
             }
 
             const bar = el('slide-bar');
@@ -807,8 +799,7 @@
             }
 
             slideTimer = setTimeout(rotateSlide, slideDuration);
-        }
-        
+        }        
         rotateSlide(); 
 
         function updateLogic() {
@@ -823,7 +814,7 @@
             for(let i=0; i < sortedPrayers.length; i++) {
                 let p = sortedPrayers[i];
                 
-                // Waktu iqamah ditambah 5 menit (5 * 60 * 1000 ms) agar layar shaf bertahan
+                // Waktu iqamah ditambah 5 menit (5 * 60 * 1000 ms) agar layar shaft bertahan
                 let waktuSelesaiIqamah = p.iqamah ? new Date(p.iqamah.getTime() + (5 * 60 * 1000)) : null;
 
                 if(p.iqamah && now >= p.adzan && now < waktuSelesaiIqamah) { 
@@ -972,9 +963,9 @@
             qrQaBox.innerHTML = "";
             new QRCode(qrQaBox, { 
                 // MASUKKAN LINK GOOGLE FORM ANDA DI BAWAH INI:
-                text: "https://forms.gle/sd7Y7SeAGqBQHguA9", 
-                width: 65, 
-                height: 65 
+                text: "https://forms.gle/jyu5g8vFMW4YJruS7", 
+                width: 50, 
+                height: 50 
             });
         }
 
@@ -1017,7 +1008,8 @@
                 if (foundId !== "") {
                     if (currentTvLiveId !== foundId) {
                         currentTvLiveId = foundId;
-                        ytFrame.src = `https://www.youtube.com/embed/${foundId}?autoplay=1&mute=0&controls=0&modestbranding=1`;
+                        // MUTE=1 AGAR AUTOPLAY BERJALAN MULUS TANPA TOMBOL PLAY MERAH
+                        ytFrame.src = `https://www.youtube.com/embed/${foundId}?autoplay=1&mute=1&controls=0&modestbranding=1`;
                         ytOverlay.classList.add("active");
                     }
                 } else {
